@@ -4,77 +4,76 @@ import time
 import smbus
 
 # ===========================================================================
-# ST_VL6180x ToF ranger Class
+# TAOS TMD2771 proximity/ALS Class
 #
-# Originally written by A. Weber
-# References Arduino library by Casey Kuhns of SparkFun:
-# https://github.com/sparkfun/ToF_Range_Finder-VL6180_Library\
+# Written by A. Weber
+# https://bitbucket.org/310weber/tmd2771
 # ===========================================================================
 
 
-class VL6180X:
+class TMD2771:
     i2c = None
 
-    __VL6180X_IDENTIFICATION_MODEL_ID               = 0x0000
-    __VL6180X_IDENTIFICATION_MODEL_REV_MAJOR        = 0x0001
-    __VL6180X_IDENTIFICATION_MODEL_REV_MINOR        = 0x0002
-    __VL6180X_IDENTIFICATION_MODULE_REV_MAJOR       = 0x0003
-    __VL6180X_IDENTIFICATION_MODULE_REV_MINOR       = 0x0004
-    __VL6180X_IDENTIFICATION_DATE                   = 0x0006    # 16bit value
-    __VL6180X_IDENTIFICATION_TIME                   = 0x0008    # 16bit value
+    __TMD2771_IDENTIFICATION_MODEL_ID               = 0x0000
+    __TMD2771_IDENTIFICATION_MODEL_REV_MAJOR        = 0x0001
+    __TMD2771_IDENTIFICATION_MODEL_REV_MINOR        = 0x0002
+    __TMD2771_IDENTIFICATION_MODULE_REV_MAJOR       = 0x0003
+    __TMD2771_IDENTIFICATION_MODULE_REV_MINOR       = 0x0004
+    __TMD2771_IDENTIFICATION_DATE                   = 0x0006    # 16bit value
+    __TMD2771_IDENTIFICATION_TIME                   = 0x0008    # 16bit value
 
-    __VL6180X_SYSTEM_MODE_GPIO0                     = 0x0010
-    __VL6180X_SYSTEM_MODE_GPIO1                     = 0x0011
-    __VL6180X_SYSTEM_HISTORY_CTRL                   = 0x0012
-    __VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO          = 0x0014
-    __VL6180X_SYSTEM_INTERRUPT_CLEAR                = 0x0015
-    __VL6180X_SYSTEM_FRESH_OUT_OF_RESET             = 0x0016
-    __VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD         = 0x0017
+    __TMD2771_SYSTEM_MODE_GPIO0                     = 0x0010
+    __TMD2771_SYSTEM_MODE_GPIO1                     = 0x0011
+    __TMD2771_SYSTEM_HISTORY_CTRL                   = 0x0012
+    __TMD2771_SYSTEM_INTERRUPT_CONFIG_GPIO          = 0x0014
+    __TMD2771_SYSTEM_INTERRUPT_CLEAR                = 0x0015
+    __TMD2771_SYSTEM_FRESH_OUT_OF_RESET             = 0x0016
+    __TMD2771_SYSTEM_GROUPED_PARAMETER_HOLD         = 0x0017
 
-    __VL6180X_SYSRANGE_START                        = 0x0018
-    __VL6180X_SYSRANGE_THRESH_HIGH                  = 0x0019
-    __VL6180X_SYSRANGE_THRESH_LOW                   = 0x001A
-    __VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD      = 0x001B
-    __VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME         = 0x001C
-    __VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE  = 0x001E
-    __VL6180X_SYSRANGE_CROSSTALK_VALID_HEIGHT       = 0x0021
-    __VL6180X_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE   = 0x0022
-    __VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET    = 0x0024
-    __VL6180X_SYSRANGE_RANGE_IGNORE_VALID_HEIGHT    = 0x0025
-    __VL6180X_SYSRANGE_RANGE_IGNORE_THRESHOLD       = 0x0026
-    __VL6180X_SYSRANGE_MAX_AMBIENT_LEVEL_MULT       = 0x002C
-    __VL6180X_SYSRANGE_RANGE_CHECK_ENABLES          = 0x002D
-    __VL6180X_SYSRANGE_VHV_RECALIBRATE              = 0x002E
-    __VL6180X_SYSRANGE_VHV_REPEAT_RATE              = 0x0031
+    __TMD2771_SYSRANGE_START                        = 0x0018
+    __TMD2771_SYSRANGE_THRESH_HIGH                  = 0x0019
+    __TMD2771_SYSRANGE_THRESH_LOW                   = 0x001A
+    __TMD2771_SYSRANGE_INTERMEASUREMENT_PERIOD      = 0x001B
+    __TMD2771_SYSRANGE_MAX_CONVERGENCE_TIME         = 0x001C
+    __TMD2771_SYSRANGE_CROSSTALK_COMPENSATION_RATE  = 0x001E
+    __TMD2771_SYSRANGE_CROSSTALK_VALID_HEIGHT       = 0x0021
+    __TMD2771_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE   = 0x0022
+    __TMD2771_SYSRANGE_PART_TO_PART_RANGE_OFFSET    = 0x0024
+    __TMD2771_SYSRANGE_RANGE_IGNORE_VALID_HEIGHT    = 0x0025
+    __TMD2771_SYSRANGE_RANGE_IGNORE_THRESHOLD       = 0x0026
+    __TMD2771_SYSRANGE_MAX_AMBIENT_LEVEL_MULT       = 0x002C
+    __TMD2771_SYSRANGE_RANGE_CHECK_ENABLES          = 0x002D
+    __TMD2771_SYSRANGE_VHV_RECALIBRATE              = 0x002E
+    __TMD2771_SYSRANGE_VHV_REPEAT_RATE              = 0x0031
 
-    __VL6180X_SYSALS_START                          = 0x0038
-    __VL6180X_SYSALS_THRESH_HIGH                    = 0x003A
-    __VL6180X_SYSALS_THRESH_LOW                     = 0x003C
-    __VL6180X_SYSALS_INTERMEASUREMENT_PERIOD        = 0x003E
-    __VL6180X_SYSALS_ANALOGUE_GAIN                  = 0x003F
-    __VL6180X_SYSALS_INTEGRATION_PERIOD             = 0x0040
+    __TMD2771_SYSALS_START                          = 0x0038
+    __TMD2771_SYSALS_THRESH_HIGH                    = 0x003A
+    __TMD2771_SYSALS_THRESH_LOW                     = 0x003C
+    __TMD2771_SYSALS_INTERMEASUREMENT_PERIOD        = 0x003E
+    __TMD2771_SYSALS_ANALOGUE_GAIN                  = 0x003F
+    __TMD2771_SYSALS_INTEGRATION_PERIOD             = 0x0040
 
-    __VL6180X_RESULT_RANGE_STATUS                   = 0x004D
-    __VL6180X_RESULT_ALS_STATUS                     = 0x004E
-    __VL6180X_RESULT_INTERRUPT_STATUS_GPIO          = 0x004F
-    __VL6180X_RESULT_ALS_VAL                        = 0x0050
-    __VL6180X_RESULT_HISTORY_BUFFER                 = 0x0052
-    __VL6180X_RESULT_RANGE_VAL                      = 0x0062
-    __VL6180X_RESULT_RANGE_RAW                      = 0x0064
-    __VL6180X_RESULT_RANGE_RETURN_RATE              = 0x0066
-    __VL6180X_RESULT_RANGE_REFERENCE_RATE           = 0x0068
-    __VL6180X_RESULT_RANGE_RETURN_SIGNAL_COUNT      = 0x006C
-    __VL6180X_RESULT_RANGE_REFERENCE_SIGNAL_COUNT   = 0x0070
-    __VL6180X_RESULT_RANGE_RETURN_AMB_COUNT         = 0x0074
-    __VL6180X_RESULT_RANGE_REFERENCE_AMB_COUNT      = 0x0078
-    __VL6180X_RESULT_RANGE_RETURN_CONV_TIME         = 0x007C
-    __VL6180X_RESULT_RANGE_REFERENCE_CONV_TIME      = 0x0080
+    __TMD2771_RESULT_RANGE_STATUS                   = 0x004D
+    __TMD2771_RESULT_ALS_STATUS                     = 0x004E
+    __TMD2771_RESULT_INTERRUPT_STATUS_GPIO          = 0x004F
+    __TMD2771_RESULT_ALS_VAL                        = 0x0050
+    __TMD2771_RESULT_HISTORY_BUFFER                 = 0x0052
+    __TMD2771_RESULT_RANGE_VAL                      = 0x0062
+    __TMD2771_RESULT_RANGE_RAW                      = 0x0064
+    __TMD2771_RESULT_RANGE_RETURN_RATE              = 0x0066
+    __TMD2771_RESULT_RANGE_REFERENCE_RATE           = 0x0068
+    __TMD2771_RESULT_RANGE_RETURN_SIGNAL_COUNT      = 0x006C
+    __TMD2771_RESULT_RANGE_REFERENCE_SIGNAL_COUNT   = 0x0070
+    __TMD2771_RESULT_RANGE_RETURN_AMB_COUNT         = 0x0074
+    __TMD2771_RESULT_RANGE_REFERENCE_AMB_COUNT      = 0x0078
+    __TMD2771_RESULT_RANGE_RETURN_CONV_TIME         = 0x007C
+    __TMD2771_RESULT_RANGE_REFERENCE_CONV_TIME      = 0x0080
 
-    __VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD       = 0x010A
-    __VL6180X_FIRMWARE_BOOTUP                       = 0x0119
-    __VL6180X_FIRMWARE_RESULT_SCALER                = 0x0120
-    __VL6180X_I2C_SLAVE_DEVICE_ADDRESS              = 0x0212
-    __VL6180X_INTERLEAVED_MODE_ENABLE               = 0x02A3
+    __TMD2771_READOUT_AVERAGING_SAMPLE_PERIOD       = 0x010A
+    __TMD2771_FIRMWARE_BOOTUP                       = 0x0119
+    __TMD2771_FIRMWARE_RESULT_SCALER                = 0x0120
+    __TMD2771_I2C_SLAVE_DEVICE_ADDRESS              = 0x0212
+    __TMD2771_INTERLEAVED_MODE_ENABLE               = 0x02A3
 
     __ALS_GAIN_1    = 0x06
     __ALS_GAIN_1_25 = 0x05
@@ -130,7 +129,7 @@ class VL6180X:
         self.idDate = 0x00
         self.idTime = 0x00
 
-        if self.get_register(self.__VL6180X_SYSTEM_FRESH_OUT_OF_RESET) == 1:
+        if self.get_register(self.__TMD2771_SYSTEM_FRESH_OUT_OF_RESET) == 1:
             print "ToF sensor is ready."
             self.ready = True
         else:
@@ -206,94 +205,94 @@ class VL6180X:
         # Recommended settings from datasheet
         # http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
         # Set GPIO1 high when sample complete
-        self.set_register(self.__VL6180X_SYSTEM_MODE_GPIO1, 0x10)
+        self.set_register(self.__TMD2771_SYSTEM_MODE_GPIO1, 0x10)
         # Set Avg sample period
-        self.set_register(self.__VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30)
+        self.set_register(self.__TMD2771_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30)
         # Set the ALS gain
-        self.set_register(self.__VL6180X_SYSALS_ANALOGUE_GAIN, 0x46)
+        self.set_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN, 0x46)
         # Set auto calibration period (Max = 255)/(OFF = 0)
-        self.set_register(self.__VL6180X_SYSRANGE_VHV_REPEAT_RATE, 0xFF)
+        self.set_register(self.__TMD2771_SYSRANGE_VHV_REPEAT_RATE, 0xFF)
         # Set ALS integration time to 100ms
-        self.set_register(self.__VL6180X_SYSALS_INTEGRATION_PERIOD, 0x63)
+        self.set_register(self.__TMD2771_SYSALS_INTEGRATION_PERIOD, 0x63)
         # perform a single temperature calibration
-        self.set_register(self.__VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01)
+        self.set_register(self.__TMD2771_SYSRANGE_VHV_RECALIBRATE, 0x01)
 
         # Optional settings from datasheet
         # http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
         # Set default ranging inter-measurement period to 100ms
-        self.set_register(self.__VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09)
+        self.set_register(self.__TMD2771_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09)
         # Set default ALS inter-measurement period to 100ms
-        self.set_register(self.__VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 0x31)
+        self.set_register(self.__TMD2771_SYSALS_INTERMEASUREMENT_PERIOD, 0x31)
         # Configures interrupt on 'New Sample Ready threshold event' 
-        self.set_register(self.__VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24)
+        self.set_register(self.__TMD2771_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24)
 
         # Additional settings defaults from community
-        self.set_register(self.__VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME, 0x32)
+        self.set_register(self.__TMD2771_SYSRANGE_MAX_CONVERGENCE_TIME, 0x32)
         self.set_register(
-            self.__VL6180X_SYSRANGE_RANGE_CHECK_ENABLES, 0x10 | 0x01)
+            self.__TMD2771_SYSRANGE_RANGE_CHECK_ENABLES, 0x10 | 0x01)
         self.set_register_16bit(
-            self.__VL6180X_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE, 0x7B)
-        self.set_register_16bit(self.__VL6180X_SYSALS_INTEGRATION_PERIOD, 0x64)
-        self.set_register(self.__VL6180X_SYSALS_ANALOGUE_GAIN, 0x40)
-        self.set_register(self.__VL6180X_FIRMWARE_RESULT_SCALER, 0x01)
+            self.__TMD2771_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE, 0x7B)
+        self.set_register_16bit(self.__TMD2771_SYSALS_INTEGRATION_PERIOD, 0x64)
+        self.set_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN, 0x40)
+        self.set_register(self.__TMD2771_FIRMWARE_RESULT_SCALER, 0x01)
 
         if self.debug:
             print "Default settings:"
             print "SYSTEM_MODE_GPIO1 - %x" % \
-                  self.get_register(self.__VL6180X_SYSTEM_MODE_GPIO1)
+                  self.get_register(self.__TMD2771_SYSTEM_MODE_GPIO1)
             print "READOUT_AVERAGING_SAMPLE_PERIOD - %x" % \
                   self.get_register(
-                      self.__VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD)
+                      self.__TMD2771_READOUT_AVERAGING_SAMPLE_PERIOD)
             print "SYSALS_ANALOGUE_GAIN - %x" % \
-                  self.get_register(self.__VL6180X_SYSALS_ANALOGUE_GAIN)
+                  self.get_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN)
             print "SYSRANGE_VHV_REPEAT_RATE - %x" % \
-                  self.get_register(self.__VL6180X_SYSRANGE_VHV_REPEAT_RATE)
+                  self.get_register(self.__TMD2771_SYSRANGE_VHV_REPEAT_RATE)
             print "SYSALS_INTEGRATION_PERIOD - %x" % \
-                  self.get_register(self.__VL6180X_SYSALS_INTEGRATION_PERIOD)
+                  self.get_register(self.__TMD2771_SYSALS_INTEGRATION_PERIOD)
             print "SYSRANGE_VHV_RECALIBRATE - %x" % \
-                  self.get_register(self.__VL6180X_SYSRANGE_VHV_RECALIBRATE)
+                  self.get_register(self.__TMD2771_SYSRANGE_VHV_RECALIBRATE)
             print "SYSRANGE_INTERMEASUREMENT_PERIOD - %x" % \
                   self.get_register(
-                      self.__VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD)
+                      self.__TMD2771_SYSRANGE_INTERMEASUREMENT_PERIOD)
             print "SYSALS_INTERMEASUREMENT_PERIOD - %x" % \
                   self.get_register(
-                      self.__VL6180X_SYSALS_INTERMEASUREMENT_PERIOD)
+                      self.__TMD2771_SYSALS_INTERMEASUREMENT_PERIOD)
             print "SYSTEM_INTERRUPT_CONFIG_GPIO - %x" % \
                   self.get_register(
-                      self.__VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO)
+                      self.__TMD2771_SYSTEM_INTERRUPT_CONFIG_GPIO)
             print "SYSRANGE_MAX_CONVERGENCE_TIME - %x" % \
                   self.get_register(
-                      self.__VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME)
+                      self.__TMD2771_SYSRANGE_MAX_CONVERGENCE_TIME)
             print "SYSRANGE_RANGE_CHECK_ENABLES - %x" % \
-                  self.get_register(self.__VL6180X_SYSRANGE_RANGE_CHECK_ENABLES)
+                  self.get_register(self.__TMD2771_SYSRANGE_RANGE_CHECK_ENABLES)
             print "SYSRANGE_EARLY_CONVERGENCE_ESTIMATE - %x" % \
                   self.get_register_16bit(
-                      self.__VL6180X_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE)
+                      self.__TMD2771_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE)
             print "SYSALS_INTEGRATION_PERIOD - %x" % \
                   self.get_register_16bit(
-                      self.__VL6180X_SYSALS_INTEGRATION_PERIOD)
+                      self.__TMD2771_SYSALS_INTEGRATION_PERIOD)
             print "SYSALS_ANALOGUE_GAIN - %x" % \
-                  self.get_register(self.__VL6180X_SYSALS_ANALOGUE_GAIN)
+                  self.get_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN)
             print "FIRMWARE_RESULT_SCALER - %x" % \
-                  self.get_register(self.__VL6180X_FIRMWARE_RESULT_SCALER)
+                  self.get_register(self.__TMD2771_FIRMWARE_RESULT_SCALER)
 
     def get_identification(self):
 
         self.idModel = self.get_register(
-            self.__VL6180X_IDENTIFICATION_MODEL_ID)
+            self.__TMD2771_IDENTIFICATION_MODEL_ID)
         self.idModelRevMajor = self.get_register(
-            self.__VL6180X_IDENTIFICATION_MODEL_REV_MAJOR)
+            self.__TMD2771_IDENTIFICATION_MODEL_REV_MAJOR)
         self.idModelRevMinor = self.get_register(
-            self.__VL6180X_IDENTIFICATION_MODEL_REV_MINOR)
+            self.__TMD2771_IDENTIFICATION_MODEL_REV_MINOR)
         self.idModuleRevMajor = self.get_register(
-            self.__VL6180X_IDENTIFICATION_MODULE_REV_MAJOR)
+            self.__TMD2771_IDENTIFICATION_MODULE_REV_MAJOR)
         self.idModuleRevMinor = self.get_register(
-            self.__VL6180X_IDENTIFICATION_MODULE_REV_MINOR)
+            self.__TMD2771_IDENTIFICATION_MODULE_REV_MINOR)
 
         self.idDate = self.get_register_16bit(
-            self.__VL6180X_IDENTIFICATION_DATE)
+            self.__TMD2771_IDENTIFICATION_DATE)
         self.idTime = self.get_register_16bit(
-            self.__VL6180X_IDENTIFICATION_TIME)
+            self.__TMD2771_IDENTIFICATION_TIME)
 
     def change_address(self, old_address, new_address):
         # NOTICE:  IT APPEARS THAT CHANGING THE ADDRESS IS NOT STORED IN NON-
@@ -304,18 +303,18 @@ class VL6180X:
         if new_address > 127:
             return old_address
 
-        self.set_register(self.__VL6180X_I2C_SLAVE_DEVICE_ADDRESS, new_address)
-        return self.get_register(self.__VL6180X_I2C_SLAVE_DEVICE_ADDRESS)
+        self.set_register(self.__TMD2771_I2C_SLAVE_DEVICE_ADDRESS, new_address)
+        return self.get_register(self.__TMD2771_I2C_SLAVE_DEVICE_ADDRESS)
 
     def get_distance(self):
         # Start Single shot mode
-        self.set_register(self.__VL6180X_SYSRANGE_START, 0x01)
+        self.set_register(self.__TMD2771_SYSRANGE_START, 0x01)
         time.sleep(0.010)
         if self.debug:
             print "Range status: %x" % \
-                  self.get_register(self.__VL6180X_RESULT_RANGE_STATUS) & 0xF1
-        distance = self.get_register(self.__VL6180X_RESULT_RANGE_VAL)
-        self.set_register(self.__VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07)
+                  self.get_register(self.__TMD2771_RESULT_RANGE_STATUS) & 0xF1
+        distance = self.get_register(self.__TMD2771_RESULT_RANGE_VAL)
+        self.set_register(self.__TMD2771_SYSTEM_INTERRUPT_CLEAR, 0x07)
         return distance
 
     def get_ambient_light(self, als_gain):
@@ -332,25 +331,25 @@ class VL6180X:
             print "Invalid gain setting: %d.  Setting to 20." % als_gain
         als_gain_actual = self.ALS_GAIN_ACTUAL.setdefault(als_gain, 20)
         self.set_register(
-            self.__VL6180X_SYSALS_ANALOGUE_GAIN,
+            self.__TMD2771_SYSALS_ANALOGUE_GAIN,
             (0x40 | self.ALS_GAIN_REG.setdefault(als_gain, self.__ALS_GAIN_20)))
 
         # Start ALS Measurement
-        self.set_register(self.__VL6180X_SYSALS_START, 0x01)
+        self.set_register(self.__TMD2771_SYSALS_START, 0x01)
 
         time.sleep(0.100)   # give it time...
 
         # Retrieve the Raw ALS value from the sensor
         if self.debug:
             print "ALS status: %x" % \
-                  self.get_register(self.__VL6180X_RESULT_ALS_STATUS) & 0xF1
-        als_raw = self.get_register_16bit(self.__VL6180X_RESULT_ALS_VAL)
-        self.set_register(self.__VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07)
+                  self.get_register(self.__TMD2771_RESULT_ALS_STATUS) & 0xF1
+        als_raw = self.get_register_16bit(self.__TMD2771_RESULT_ALS_VAL)
+        self.set_register(self.__TMD2771_SYSTEM_INTERRUPT_CLEAR, 0x07)
 
         # Get Integration Period for calculation, we do this every time in case
         # someone changes it on us.
         als_integration_period_raw = self.get_register_16bit(
-            self.__VL6180X_SYSALS_INTEGRATION_PERIOD)
+            self.__TMD2771_SYSALS_INTEGRATION_PERIOD)
 
         als_integration_period = 100.0 / als_integration_period_raw
 
