@@ -5,7 +5,7 @@
  - explorer board includes pull-ups on i2c """
 
 import sys
-from ST_VL6180X import VL6180X
+from TMD2771 import TMD2771
 from time import sleep
 import RPi.GPIO as GPIO  # Import GPIO functions
 
@@ -17,7 +17,7 @@ if len(sys.argv) > 1:
 
 # setup ToF ranging/ALS sensor
 tof_address = 0x29
-tof_sensor = VL6180X(address=tof_address, debug=debug)
+tof_sensor = TMD2771(address=tof_address, debug=debug)
 tof_sensor.get_identification()
 if tof_sensor.idModel != 0xB4:
     print"Not a valid sensor id: %X" % tof_sensor.idModel
