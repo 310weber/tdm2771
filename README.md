@@ -1,12 +1,12 @@
-# 310weber's ST VL6180X Python Library #
-A python library and test script to use the ST VL6180X time-of-flight (TOF) / ambient light sensor (ALS) with a Raspberry Pi
+# 310weber's TAOS TMD2771 Python Library #
+A python library and test script to use the TAOS TMD2771 proximity / ambient light sensor (ALS) with a Raspberry Pi
 
 * Make sure you have i2c enabled and python-rpi.gpio installed on your raspberry pi.
-* The VL6180X is a 2.8 V device - make sure you use a level shifter between the sensor and the 3.3 V Raspberry Pi GPIOs
+* The TMD2771 is a 3 V device - no level shifter required between the sensor and the 3.3 V Raspberry Pi GPIOs
 
 Written by Arnie Weber.  BSD license, all text above and below must be included in any redistribution
 
-Copyright (c) 2014-2015 Arnie Weber.  All rights reserved.
+Copyright (c) 2015 Arnie Weber.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. * Neither the name of the nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
