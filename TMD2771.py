@@ -145,7 +145,7 @@ class TMD2771:
 
         # Check module identification to verify proper communication
         self.idModel = self.get_register(self.__TMD2771_DEVICE_ID)
-        if self.idModel == (self.__ID_TMD27711 or self.__ID_TMD27713):
+        if self.idModel in (self.__ID_TMD27711, self.__ID_TMD27713):
             print "Prox/ALS sensor is ready. Model:", self.idModel
             self.ready = True
         else:
@@ -212,7 +212,7 @@ class TMD2771:
         self.set_register(self.__TMD2771_ENABLE, 0x00)
         if self.debug:
             enable_register = self.get_register(self.__TMD2771_ENABLE)
-            if (enable_register | 0x01) == 0x00:
+            if (enable_register & 0x01) == 0x00:
                 print "Sensor stopped. Enable register - %x" % enable_register
             else:
                 print "Sensor failed ot stop. Enable register - %x" % \
@@ -240,9 +240,10 @@ class TMD2771:
         als_time_actual = self.ALS_TIME_ACTUAL.get(
                 self.get_register(self.__TMD2771_ALS_TIME))
         if self.debug:
-            print "ALS gain - %dx; ALS Time - %d ms" \
-                  % (als_gain_actual, als_time_actual)
+            print "ALS gain - ",als_gain_actual, "; ALS Time - ", als_time_actual
 
+        als_gain_actual = 1
+        als_time_actual = 2.72
         scaling_factor = 1.0  # 1.0 for open air (other factors for under glass)
 
         counts_per_lux = (als_time_actual * als_gain_actual) / \
