@@ -30,21 +30,21 @@ class TMD2771:
     __TMD2771_CONFIGURATION                         = 0xAD
     __TMD2771_PROX_PULSE_COUNT                      = 0xAE
     __TMD2771_CONTROL_REGISTER                      = 0xAF
-    __TMD2771_DEVICE_ID                             = 0xB2      # 0x20 = TMD27711; 0x29 = TMD27713
+    __TMD2771_DEVICE_ID                             = 0xB2  # 0x20 = TMD27711; 0x29 = TMD27713
     __TMD2771_DEVICE_STATUS                         = 0xB3
-    __TMD2771_ALS_CH0_DATA_LOW_BYTE                 = 0xB4      # 2 byte register, read in one operation
+    __TMD2771_ALS_CH0_DATA_LOW_BYTE                 = 0xB4  # 2 byte register, read in one operation
     __TMD2771_ALS_CH0_DATA_HIGH_BYTE                = 0xB5
-    __TMD2771_ALS_CH1_DATA_LOW_BYTE                 = 0xB6      # 2 byte register, read in one operation
+    __TMD2771_ALS_CH1_DATA_LOW_BYTE                 = 0xB6  # 2 byte register, read in one operation
     __TMD2771_ALS_CH1_DATA_HIGH_BYTE                = 0xB7
-    __TMD2771_PROX_DATA_LOW_BYTE                    = 0xB8      # 2 byte register, read in one operation
+    __TMD2771_PROX_DATA_LOW_BYTE                    = 0xB8  # 2 byte register, read in one operation
     __TMD2771_PROX_DATA_HIGH_BYTE                   = 0xB9
 
-    __ENABLE_PIEN           = 0x20  # Proximity interrupt mask.  When asserted, permits proximity interrupts.
-    __ENABLE_AIEN           = 0x10  # ALS interrupt mask. When asserted, permits ALS interrupts.
-    __ENABLE_WEN            = 0x08  # Wait enable. 1 enables wait timer; 0 disables.
-    __ENABLE_PEN            = 0x04  # Proximity enable. 1 enables proximity; 0 disables.
+    __ENABLE_PIEN           = 0x20  # Prox interrupt mask.  When asserted, permits proximity interrupts
+    __ENABLE_AIEN           = 0x10  # ALS interrupt mask. When asserted, permits ALS interrupts
+    __ENABLE_WEN            = 0x08  # Wait enable. 1 enables wait timer; 0 disables
+    __ENABLE_PEN            = 0x04  # Proximity enable. 1 enables proximity; 0 disables
     __ENABLE_AEN            = 0x02  # ALS enable. 1 enables ALS; 0 disables
-    __ENABLE_PON            = 0x01  # Power ON. This bit activates internal oscillator. 1 enables; 0 disables.
+    __ENABLE_PON            = 0x01  # Power ON. This bit activates internal oscillator. 1 enables; 0 disables
 
     __ALS_TIME_2_72         = 0xFF  # ALS integration time 2.72 ms
     __ALS_TIME_27_2         = 0xF6  # ALS integration time 27.2 ms
@@ -52,16 +52,16 @@ class TMD2771:
     __ALS_TIME_174          = 0xC0  # ALS integration time 174 ms
     __ALS_TIME_696          = 0x00  # ALS integration time 696 ms (Default)
 
-    __PROX_TIME_2_72        = 0xFF  # Proximity integration time 2.72 ms - default value; do not change
+    __PROX_TIME_2_72        = 0xFF  # 2.72 ms (Default) --DO NOT CHANGE--
 
     # Wait time in ms - multiply by 12 if WLONG is set
     __WAIT_TIME_2_72        = 0xFF  # Wait time 2.72 ms (32 ms if WLONG = 1)
     __WAIT_TIME_200         = 0xB6  # Wait time 200 ms  (2.4 s if WLONG = 1)
     __WAIT_TIME_700         = 0x00  # Wait time 700 ms  (8.3 s if WLONG = 1)
 
-    __PERSISTENCE_PROX_ALL  =0x00   # Every proximity cycle generates an interrupt
-    __PERSISTENCE_PROX_1    =0x10   # Proximity interrupt only when 1 value out of range
-    __PERSISTENCE_PROX_2    =0x20   # Proximity interrupt only when 2 consecutive values out of range
+    __PERSISTENCE_PROX_ALL  =0x00   # Every prox cycle generates an interrupt
+    __PERSISTENCE_PROX_1    =0x10   # Prox int. when 1 value out of range
+    __PERSISTENCE_PROX_2    =0x20   # Prox int. when 2 consecutive out of range
     __PERSISTENCE_PROX_3    =0x30   # " "
     __PERSISTENCE_PROX_4    =0x40   # " "
     __PERSISTENCE_PROX_5    =0x50   # " "
@@ -74,24 +74,24 @@ class TMD2771:
     __PERSISTENCE_PROX_12   =0xC0   # " "
     __PERSISTENCE_PROX_13   =0xD0   # " "
     __PERSISTENCE_PROX_14   =0xE0   # " "
-    __PERSISTENCE_PROX_15   =0xF0   # Proximity interrupt only when 15 consecutive values out of range
+    __PERSISTENCE_PROX_15   =0xF0   # Prox int. when 15 consecutive out of range
 
     __PERSISTENCE_ALS_ALL   =0x00   # Every ALS cycle generates an interrupt
-    __PERSISTENCE_ALS_1     =0x01   # ALS interrupt only when 1 value out of range
-    __PERSISTENCE_ALS_2     =0x02   # ALS interrupt only when 2  consecutive values out of range
-    __PERSISTENCE_ALS_3     =0x03   # ALS interrupt only when 3  consecutive values out of range
-    __PERSISTENCE_ALS_5     =0x04   # ALS interrupt only when 5  consecutive values out of range
-    __PERSISTENCE_ALS_10    =0x05   # ALS interrupt only when 10 consecutive values out of range
-    __PERSISTENCE_ALS_15    =0x06   # ALS interrupt only when 15 consecutive values out of range
-    __PERSISTENCE_ALS_20    =0x07   # ALS interrupt only when 20 consecutive values out of range
-    __PERSISTENCE_ALS_25    =0x08   # ALS interrupt only when 25 consecutive values out of range
-    __PERSISTENCE_ALS_30    =0x09   # ALS interrupt only when 30 consecutive values out of range
-    __PERSISTENCE_ALS_35    =0x0A   # ALS interrupt only when 35 consecutive values out of range
-    __PERSISTENCE_ALS_40    =0x0B   # ALS interrupt only when 40 consecutive values out of range
-    __PERSISTENCE_ALS_45    =0x0C   # ALS interrupt only when 45 consecutive values out of range
-    __PERSISTENCE_ALS_50    =0x0D   # ALS interrupt only when 50 consecutive values out of range
-    __PERSISTENCE_ALS_55    =0x0E   # ALS interrupt only when 55 consecutive values out of range
-    __PERSISTENCE_ALS_60    =0x0F   # ALS interrupt only when 60 consecutive values out of range
+    __PERSISTENCE_ALS_1     =0x01   # ALS int. when 1 value out of range
+    __PERSISTENCE_ALS_2     =0x02   # ALS int. when 2  consecutive out of range
+    __PERSISTENCE_ALS_3     =0x03   # ALS int. when 3  consecutive out of range
+    __PERSISTENCE_ALS_5     =0x04   # ALS int. when 5  consecutive out of range
+    __PERSISTENCE_ALS_10    =0x05   # ALS int. when 10 consecutive out of range
+    __PERSISTENCE_ALS_15    =0x06   # ALS int. when 15 consecutive out of range
+    __PERSISTENCE_ALS_20    =0x07   # ALS int. when 20 consecutive out of range
+    __PERSISTENCE_ALS_25    =0x08   # ALS int. when 25 consecutive out of range
+    __PERSISTENCE_ALS_30    =0x09   # ALS int. when 30 consecutive out of range
+    __PERSISTENCE_ALS_35    =0x0A   # ALS int. when 35 consecutive out of range
+    __PERSISTENCE_ALS_40    =0x0B   # ALS int. when 40 consecutive out of range
+    __PERSISTENCE_ALS_45    =0x0C   # ALS int. when 45 consecutive out of range
+    __PERSISTENCE_ALS_50    =0x0D   # ALS int. when 50 consecutive out of range
+    __PERSISTENCE_ALS_55    =0x0E   # ALS int. when 55 consecutive out of range
+    __PERSISTENCE_ALS_60    =0x0F   # ALS int. when 60 consecutive out of range
 
     __CONFIGURATION_WLONG   =0x02   # Enable long wait time (12x normal)
 
@@ -112,26 +112,23 @@ class TMD2771:
 
     __STATUS_PROX_INT       = 0x20  # Proximity interrupt asserted
     __STATUS_ALS_INT        = 0x10  # ALS interrupt asserted
-    __STATUS_ALS_VALID      = 0x01  # Indicates the ALS channels have completed an integration cycle
+    __STATUS_ALS_VALID      = 0x01  # ALS channels completed integration cycle
 
     # Dictionaries with the valid gain/timing values
     # These simplify and clean the code (avoid abuse of if/elif/else clauses)
     ALS_GAIN_ACTUAL = {
-        1:      __CONTROL_AGAIN_1,
-        8:      __CONTROL_AGAIN_8,
-        16:     __CONTROL_AGAIN_16,
-        120:    __CONTROL_AGAIN_120,
-    }
-    ALS_TIME_ACTUAL = {
-        2.72:   __ALS_TIME_2_72,
-        27.2:   __ALS_TIME_27_2,
-        101:    __ALS_TIME_101,
-        174:    __ALS_TIME_174,
-        696:    __ALS_TIME_696
+        __CONTROL_AGAIN_1:      1,
+        __CONTROL_AGAIN_8:      8,
+        __CONTROL_AGAIN_16:     16,
+        __CONTROL_AGAIN_120:    120
     }
 
-    PROX_TIME_ACTUAL = {
-        2.72:   __PROX_TIME_2_72
+    ALS_TIME_ACTUAL = {
+        __ALS_TIME_2_72:    2.72,
+        __ALS_TIME_27_2:    27.2,
+        __ALS_TIME_101:     101,
+        __ALS_TIME_174:     174,
+        __ALS_TIME_696:     696
     }
 
     def __init__(self, address=0x39, debug=False):
@@ -155,7 +152,7 @@ class TMD2771:
             print "Prox/ALS sensor error."
             self.ready = False
 
-    def enable(self):
+    def start(self):
         # Recommended settings from application note
         # http://ams.com/eng/content/view/download/145120
 
@@ -171,7 +168,8 @@ class TMD2771:
                            self.__CONTROL_PDIODE_CH1 |
                            self.__CONTROL_AGAIN_1)
                           )
-        # Enable register: Enable prox and ALS interrupts, wait, prox and ALS, power on
+        # Enable register:
+        # Enable prox and ALS interrupts, wait, prox and ALS, power on
         self.set_register(self.__TMD2771_ENABLE,
                           (self.__ENABLE_PIEN |
                            self.__ENABLE_AIEN |
@@ -210,83 +208,94 @@ class TMD2771:
             print "Power on - %x" % \
                   (enable_register | 0x01)
 
+    def stop(self):
+        self.set_register(self.__TMD2771_ENABLE, 0x00)
+        if self.debug:
+            enable_register = self.get_register(self.__TMD2771_ENABLE)
+            if (enable_register | 0x01) == 0x00:
+                print "Sensor stopped. Enable register - %x" % enable_register
+            else:
+                print "Sensor failed ot stop. Enable register - %x" % \
+                      enable_register
+
     def get_distance(self):
-        # Start Single shot mode
-        self.set_register(self.__TMD2771_SYSRANGE_START, 0x01)
-        time.sleep(0.010)
+        prox_data = self.get_register_16bit(self.__TMD2771_PROX_DATA_LOW_BYTE)
+        # Reverse bytes because low byte is read first
+        prox_data = ((prox_data << 8) & 0xFF00) | (prox_data >> 8)
         if self.debug:
-            print "Range status: %x" % \
-                  self.get_register(self.__TMD2771_RESULT_RANGE_STATUS) & 0xF1
-        distance = self.get_register(self.__TMD2771_RESULT_RANGE_VAL)
-        self.set_register(self.__TMD2771_SYSTEM_INTERRUPT_CLEAR, 0x07)
-        return distance
+            print "Proximity data - %d" % prox_data
+        return prox_data
 
-    def get_ambient_light(self, als_gain):
-        # First load in Gain we are using, do it every time in case someone
-        # changes it on us.
-        # Note: Upper nibble should be set to 0x4 i.e. for ALS gain
-        # of 1.0 write 0x46
-
-        # Set the ALS gain, defaults to 20.
-        # If gain is in the dictionary (defined in init()) it returns the value
-        # of the constant otherwise it returns the value for gain 20.
-        # This saves a lot of if/elif/else code!
-        if als_gain not in self.ALS_GAIN_ACTUAL:
-            print "Invalid gain setting: %d.  Setting to 20." % als_gain
-        als_gain_actual = self.ALS_GAIN_ACTUAL.setdefault(als_gain, 20)
-        self.set_register(
-            self.__TMD2771_SYSALS_ANALOGUE_GAIN,
-            (0x40 | self.ALS_GAIN_REG.setdefault(als_gain, self.__ALS_GAIN_20)))
-
-        # Start ALS Measurement
-        self.set_register(self.__TMD2771_SYSALS_START, 0x01)
-
-        time.sleep(0.100)   # give it time...
-
-        # Retrieve the Raw ALS value from the sensor
+    def get_ambient_light(self):
+        ch0_data = self.get_register_16bit(self.__TMD2771_ALS_CH0_DATA_LOW_BYTE)
+        ch1_data = self.get_register_16bit(self.__TMD2771_ALS_CH1_DATA_LOW_BYTE)
+        # Reverse bytes because low byte is read first
+        ch0_data = ((ch0_data << 8) & 0xFF00) | (ch0_data >> 8)
+        ch1_data = ((ch1_data << 8) & 0xFF00) | (ch1_data >> 8)
         if self.debug:
-            print "ALS status: %x" % \
-                  self.get_register(self.__TMD2771_RESULT_ALS_STATUS) & 0xF1
-        als_raw = self.get_register_16bit(self.__TMD2771_RESULT_ALS_VAL)
-        self.set_register(self.__TMD2771_SYSTEM_INTERRUPT_CLEAR, 0x07)
+            print "ALS Ch0 data - %x; Ch1 data - %x" % (ch0_data, ch1_data)
 
-        # Get Integration Period for calculation, we do this every time in case
-        # someone changes it on us.
-        als_integration_period_raw = self.get_register_16bit(
-            self.__TMD2771_SYSALS_INTEGRATION_PERIOD)
+        als_gain_actual = self.ALS_GAIN_ACTUAL.get(
+                self.get_register(self.__TMD2771_CONTROL_REGISTER) | 0x03)
+        als_time_actual = self.ALS_TIME_ACTUAL.get(
+                self.get_register(self.__TMD2771_ALS_TIME))
+        if self.debug:
+            print "ALS gain - %dx; ALS Time - %d ms" \
+                  % (als_gain_actual, als_time_actual)
 
-        als_integration_period = 100.0 / als_integration_period_raw
+        scaling_factor = 1.0  # 1.0 for open air (other factors for under glass)
 
-        # Calculate actual LUX from application note
-        als_calculated = \
-            0.32 * (als_raw / als_gain_actual) * als_integration_period
+        counts_per_lux = (als_time_actual * als_gain_actual) / \
+                         (scaling_factor*24)
+        lux_1 = (ch0_data - (2 * ch1_data)) / counts_per_lux
+        lux_2 = ((0.6 * ch0_data) - ch1_data) / counts_per_lux
+        lux_calculated = max(lux_1, lux_2, 0)
+        if self.debug:
+            print"ALS CPS - %.3d; Lux1 - %.1d; Lux2 - %.1d; Lux - %.1d" % \
+                 (counts_per_lux, lux_1, lux_2, lux_calculated)
 
-        return als_calculated
+        return lux_calculated
 
     def get_register(self, register_address):
-        self.i2c.write_i2c_block_data(self.address, register_address)
-        data = self.i2c.read_byte(self.address)
-        return data
+        # Reads an unsigned 8-bit value from the I2C device
+        result = self.i2c.read_byte_data(self.address, register_address)
+        if self.debug:
+            print "I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" % \
+                  (self.address, result & 0xFF, register_address)
+        return result
 
     def get_register_16bit(self, register_address):
         # Reads an unsigned 16-bit value from the I2C device
-        try:
-            result = self.bus.read_word_data(self.address, register_address)
-            if self.debug:
-                print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % \
-                      (self.address, result & 0xFFFF, register_address)
-            return result
-        except IOError, err:
-            return self.errMsg()
+        result = self.i2c.read_word_data(self.address, register_address)
+        if self.debug:
+            print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % \
+                  (self.address, result & 0xFFFF, register_address)
+        return result
 
     def set_register(self, register_address, data):
-        a1 = (register_address >> 8) & 0xFF
-        a0 = register_address & 0xFF
-        self.i2c.write_i2c_block_data(self.address, a1, [a0, (data & 0xFF)])
+        # Writes an unsigned 8-bit value from the I2C device
+        self.i2c.write_byte_data(self.address, register_address, data)
+        if self.debug:
+            read_back = self.i2c.read_byte_data(self.address, register_address)
+            if read_back == data:
+                print "Success - I2C: Device 0x%02X returned 0x%02X from reg " \
+                      "0x%02X" \
+                      % (self.address, read_back & 0xFF, register_address)
+            else:
+                print "Failed - I2C: Device 0x%02X returned 0x%02X from reg " \
+                      "0x%02X" \
+                      % (self.address, read_back & 0xFF, register_address)
 
     def set_register_16bit(self, register_address, data):
-        a1 = (register_address >> 8) & 0xFF
-        a0 = register_address & 0xFF
-        d1 = (data >> 8) & 0xFF
-        d0 = data & 0xFF
-        self.i2c.write_i2c_block_data(self.address, a1, [a0, d1, d0])
+        # Writes an unsigned 16-bit value from the I2C device
+        self.i2c.write_word_data(self.address, register_address, data)
+        if self.debug:
+            read_back = self.i2c.read_word_data(self.address, register_address)
+            if read_back == data:
+                print "Success - I2C: Device 0x%02X returned 0x%04X from reg " \
+                      "0x%02X" \
+                      % (self.address, read_back & 0xFF, register_address)
+            else:
+                print "Failed - I2C: Device 0x%02X returned 0x%04X from reg " \
+                      "0x%02X" \
+                      % (self.address, read_back & 0xFF, register_address)
