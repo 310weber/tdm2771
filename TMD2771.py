@@ -14,105 +14,131 @@ import smbus
 class TMD2771:
     i2c = None
 
-    __TMD2771_IDENTIFICATION_MODEL_ID               = 0x0000
-    __TMD2771_IDENTIFICATION_MODEL_REV_MAJOR        = 0x0001
-    __TMD2771_IDENTIFICATION_MODEL_REV_MINOR        = 0x0002
-    __TMD2771_IDENTIFICATION_MODULE_REV_MAJOR       = 0x0003
-    __TMD2771_IDENTIFICATION_MODULE_REV_MINOR       = 0x0004
-    __TMD2771_IDENTIFICATION_DATE                   = 0x0006    # 16bit value
-    __TMD2771_IDENTIFICATION_TIME                   = 0x0008    # 16bit value
+    __TMD2771_ENABLE                                = 0xA0
+    __TMD2771_ALS_TIME                              = 0xA1
+    __TMD2771_PROX_TIME                             = 0xA2
+    __TMD2771_WAIT_TIME                             = 0xA3
+    __TMD2771_ALS_INTERRUPT_LOW_THRESH_LOW_BYTE     = 0xA4
+    __TMD2771_ALS_INTERRUPT_LOW_THRESH_HIGH_BYTE    = 0xA5
+    __TMD2771_ALS_INTERRUPT_HIGH_THRESH_LOW_BYTE    = 0xA6
+    __TMD2771_ALS_INTERRUPT_HIGH_THRESH_HIGH_BYTE   = 0xA7
+    __TMD2771_PROX_INTERRUPT_LOW_THRESH_LOW_BYTE    = 0xA8
+    __TMD2771_PROX_INTERRUPT_LOW_THRESH_HIGH_BYTE   = 0xA9
+    __TMD2771_PROX_INTERRUPT_HIGH_THRESH_LOW_BYTE   = 0xAA
+    __TMD2771_PROX_INTERRUPT_HIGH_THRESH_HIGH_BYTE  = 0xAB
+    __TMD2771_PROX_INTERRUPT_PERSISTENCE_FILTERS    = 0xAC
+    __TMD2771_CONFIGURATION                         = 0xAD
+    __TMD2771_PROX_PULSE_COUNT                      = 0xAE
+    __TMD2771_CONTROL_REGISTER                      = 0xAF
+    __TMD2771_DEVICE_ID                             = 0xB2      # 0x20 = TMD27711; 0x29 = TMD27713
+    __TMD2771_DEVICE_STATUS                         = 0xB3
+    __TMD2771_ALS_CH0_DATA_LOW_BYTE                 = 0xB4      # 2 byte register, read in one operation
+    __TMD2771_ALS_CH0_DATA_HIGH_BYTE                = 0xB5
+    __TMD2771_ALS_CH1_DATA_LOW_BYTE                 = 0xB6      # 2 byte register, read in one operation
+    __TMD2771_ALS_CH1_DATA_HIGH_BYTE                = 0xB7
+    __TMD2771_PROX_DATA_LOW_BYTE                    = 0xB8      # 2 byte register, read in one operation
+    __TMD2771_PROX_DATA_HIGH_BYTE                   = 0xB9
 
-    __TMD2771_SYSTEM_MODE_GPIO0                     = 0x0010
-    __TMD2771_SYSTEM_MODE_GPIO1                     = 0x0011
-    __TMD2771_SYSTEM_HISTORY_CTRL                   = 0x0012
-    __TMD2771_SYSTEM_INTERRUPT_CONFIG_GPIO          = 0x0014
-    __TMD2771_SYSTEM_INTERRUPT_CLEAR                = 0x0015
-    __TMD2771_SYSTEM_FRESH_OUT_OF_RESET             = 0x0016
-    __TMD2771_SYSTEM_GROUPED_PARAMETER_HOLD         = 0x0017
+    __ENABLE_PIEN           = 0x20  # Proximity interrupt mask.  When asserted, permits proximity interrupts.
+    __ENABLE_AIEN           = 0x10  # ALS interrupt mask. When asserted, permits ALS interrupts.
+    __ENABLE_WEN            = 0x08  # Wait enable. 1 enables wait timer; 0 disables.
+    __ENABLE_PEN            = 0x04  # Proximity enable. 1 enables proximity; 0 disables.
+    __ENABLE_AEN            = 0x02  # ALS enable. 1 enables ALS; 0 disables
+    __ENABLE_PON            = 0x01  # Power ON. This bit activates internal oscillator. 1 enables; 0 disables.
 
-    __TMD2771_SYSRANGE_START                        = 0x0018
-    __TMD2771_SYSRANGE_THRESH_HIGH                  = 0x0019
-    __TMD2771_SYSRANGE_THRESH_LOW                   = 0x001A
-    __TMD2771_SYSRANGE_INTERMEASUREMENT_PERIOD      = 0x001B
-    __TMD2771_SYSRANGE_MAX_CONVERGENCE_TIME         = 0x001C
-    __TMD2771_SYSRANGE_CROSSTALK_COMPENSATION_RATE  = 0x001E
-    __TMD2771_SYSRANGE_CROSSTALK_VALID_HEIGHT       = 0x0021
-    __TMD2771_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE   = 0x0022
-    __TMD2771_SYSRANGE_PART_TO_PART_RANGE_OFFSET    = 0x0024
-    __TMD2771_SYSRANGE_RANGE_IGNORE_VALID_HEIGHT    = 0x0025
-    __TMD2771_SYSRANGE_RANGE_IGNORE_THRESHOLD       = 0x0026
-    __TMD2771_SYSRANGE_MAX_AMBIENT_LEVEL_MULT       = 0x002C
-    __TMD2771_SYSRANGE_RANGE_CHECK_ENABLES          = 0x002D
-    __TMD2771_SYSRANGE_VHV_RECALIBRATE              = 0x002E
-    __TMD2771_SYSRANGE_VHV_REPEAT_RATE              = 0x0031
+    __ALS_TIME_2_72         = 0xFF  # ALS integration time 2.72 ms
+    __ALS_TIME_27_2         = 0xF6  # ALS integration time 27.2 ms
+    __ALS_TIME_101          = 0xDB  # ALS integration time 101 ms
+    __ALS_TIME_174          = 0xC0  # ALS integration time 174 ms
+    __ALS_TIME_696          = 0x00  # ALS integration time 696 ms (Default)
 
-    __TMD2771_SYSALS_START                          = 0x0038
-    __TMD2771_SYSALS_THRESH_HIGH                    = 0x003A
-    __TMD2771_SYSALS_THRESH_LOW                     = 0x003C
-    __TMD2771_SYSALS_INTERMEASUREMENT_PERIOD        = 0x003E
-    __TMD2771_SYSALS_ANALOGUE_GAIN                  = 0x003F
-    __TMD2771_SYSALS_INTEGRATION_PERIOD             = 0x0040
+    __PROX_TIME_2_72        = 0xFF  # Proximity integration time 2.72 ms - default value; do not change
 
-    __TMD2771_RESULT_RANGE_STATUS                   = 0x004D
-    __TMD2771_RESULT_ALS_STATUS                     = 0x004E
-    __TMD2771_RESULT_INTERRUPT_STATUS_GPIO          = 0x004F
-    __TMD2771_RESULT_ALS_VAL                        = 0x0050
-    __TMD2771_RESULT_HISTORY_BUFFER                 = 0x0052
-    __TMD2771_RESULT_RANGE_VAL                      = 0x0062
-    __TMD2771_RESULT_RANGE_RAW                      = 0x0064
-    __TMD2771_RESULT_RANGE_RETURN_RATE              = 0x0066
-    __TMD2771_RESULT_RANGE_REFERENCE_RATE           = 0x0068
-    __TMD2771_RESULT_RANGE_RETURN_SIGNAL_COUNT      = 0x006C
-    __TMD2771_RESULT_RANGE_REFERENCE_SIGNAL_COUNT   = 0x0070
-    __TMD2771_RESULT_RANGE_RETURN_AMB_COUNT         = 0x0074
-    __TMD2771_RESULT_RANGE_REFERENCE_AMB_COUNT      = 0x0078
-    __TMD2771_RESULT_RANGE_RETURN_CONV_TIME         = 0x007C
-    __TMD2771_RESULT_RANGE_REFERENCE_CONV_TIME      = 0x0080
+    # Wait time in ms - multiply by 12 if WLONG is set
+    __WAIT_TIME_2_72        = 0xFF  # Wait time 2.72 ms (32 ms if WLONG = 1)
+    __WAIT_TIME_200         = 0xB6  # Wait time 200 ms  (2.4 s if WLONG = 1)
+    __WAIT_TIME_700         = 0x00  # Wait time 700 ms  (8.3 s if WLONG = 1)
 
-    __TMD2771_READOUT_AVERAGING_SAMPLE_PERIOD       = 0x010A
-    __TMD2771_FIRMWARE_BOOTUP                       = 0x0119
-    __TMD2771_FIRMWARE_RESULT_SCALER                = 0x0120
-    __TMD2771_I2C_SLAVE_DEVICE_ADDRESS              = 0x0212
-    __TMD2771_INTERLEAVED_MODE_ENABLE               = 0x02A3
+    __PERSISTENCE_PROX_ALL  =0x00   # Every proximity cycle generates an interrupt
+    __PERSISTENCE_PROX_1    =0x10   # Proximity interrupt only when 1 value out of range
+    __PERSISTENCE_PROX_2    =0x20   # Proximity interrupt only when 2 consecutive values out of range
+    __PERSISTENCE_PROX_3    =0x30   # " "
+    __PERSISTENCE_PROX_4    =0x40   # " "
+    __PERSISTENCE_PROX_5    =0x50   # " "
+    __PERSISTENCE_PROX_6    =0x60   # " "
+    __PERSISTENCE_PROX_7    =0x70   # " "
+    __PERSISTENCE_PROX_8    =0x80   # " "
+    __PERSISTENCE_PROX_9    =0x90   # " "
+    __PERSISTENCE_PROX_10   =0xA0   # " "
+    __PERSISTENCE_PROX_11   =0xB0   # " "
+    __PERSISTENCE_PROX_12   =0xC0   # " "
+    __PERSISTENCE_PROX_13   =0xD0   # " "
+    __PERSISTENCE_PROX_14   =0xE0   # " "
+    __PERSISTENCE_PROX_15   =0xF0   # Proximity interrupt only when 15 consecutive values out of range
 
-    __ALS_GAIN_1    = 0x06
-    __ALS_GAIN_1_25 = 0x05
-    __ALS_GAIN_1_67 = 0x04
-    __ALS_GAIN_2_5  = 0x03
-    __ALS_GAIN_5    = 0x02
-    __ALS_GAIN_10   = 0x01
-    __ALS_GAIN_20   = 0x00
-    __ALS_GAIN_40   = 0x07
+    __PERSISTENCE_ALS_ALL   =0x00   # Every ALS cycle generates an interrupt
+    __PERSISTENCE_ALS_1     =0x01   # ALS interrupt only when 1 value out of range
+    __PERSISTENCE_ALS_2     =0x02   # ALS interrupt only when 2  consecutive values out of range
+    __PERSISTENCE_ALS_3     =0x03   # ALS interrupt only when 3  consecutive values out of range
+    __PERSISTENCE_ALS_5     =0x04   # ALS interrupt only when 5  consecutive values out of range
+    __PERSISTENCE_ALS_10    =0x05   # ALS interrupt only when 10 consecutive values out of range
+    __PERSISTENCE_ALS_15    =0x06   # ALS interrupt only when 15 consecutive values out of range
+    __PERSISTENCE_ALS_20    =0x07   # ALS interrupt only when 20 consecutive values out of range
+    __PERSISTENCE_ALS_25    =0x08   # ALS interrupt only when 25 consecutive values out of range
+    __PERSISTENCE_ALS_30    =0x09   # ALS interrupt only when 30 consecutive values out of range
+    __PERSISTENCE_ALS_35    =0x0A   # ALS interrupt only when 35 consecutive values out of range
+    __PERSISTENCE_ALS_40    =0x0B   # ALS interrupt only when 40 consecutive values out of range
+    __PERSISTENCE_ALS_45    =0x0C   # ALS interrupt only when 45 consecutive values out of range
+    __PERSISTENCE_ALS_50    =0x0D   # ALS interrupt only when 50 consecutive values out of range
+    __PERSISTENCE_ALS_55    =0x0E   # ALS interrupt only when 55 consecutive values out of range
+    __PERSISTENCE_ALS_60    =0x0F   # ALS interrupt only when 60 consecutive values out of range
 
-    # Dictionaries with the valid ALS gain values
+    __CONFIGURATION_WLONG   =0x02   # Enable long wait time (12x normal)
+
+    __CONTROL_PDRIVE_100    = 0x00  # LED drive strength 100%
+    __CONTROL_PDRIVE_50     = 0x40  # LED drive strength 50%
+    __CONTROL_PDRIVE_25     = 0x80  # LED drive strength 25%
+    __CONTROL_PDRIVE_12_5   = 0xB0  # LED drive strength 12.5%
+    __CONTROL_PDIODE_CH0    = 0x10  # Proximity uses channel 0 diode
+    __CONTROL_PDIODE_CH1    = 0x20  # Proximity uses channel 1 diode
+    __CONTROL_PDIODE_BOTH   = 0x30  # Proximity uses both diodes
+    __CONTROL_AGAIN_1       = 0x00  # ALS gain 1x
+    __CONTROL_AGAIN_8       = 0x01  # ALS gain 8x
+    __CONTROL_AGAIN_16      = 0x02  # ALS gain 16x
+    __CONTROL_AGAIN_120     = 0x03  # ALS gain 120x
+
+    __ID_TMD27711           = 0x20  # Model with i2c voltage = VDD
+    __ID_TMD27713           = 0x29  # Model with i2c voltage = 1.8 V
+
+    __STATUS_PROX_INT       = 0x20  # Proximity interrupt asserted
+    __STATUS_ALS_INT        = 0x10  # ALS interrupt asserted
+    __STATUS_ALS_VALID      = 0x01  # Indicates the ALS channels have completed an integration cycle
+
+    # Dictionaries with the valid gain/timing values
     # These simplify and clean the code (avoid abuse of if/elif/else clauses)
-    ALS_GAIN_REG = {
-        1:      __ALS_GAIN_1,
-        1.25:   __ALS_GAIN_1_25,
-        1.67:   __ALS_GAIN_1_67,
-        2.5:    __ALS_GAIN_2_5,
-        5:      __ALS_GAIN_5,
-        10:     __ALS_GAIN_10,
-        20:     __ALS_GAIN_20,
-        40:     __ALS_GAIN_40
+    ALS_GAIN_ACTUAL = {
+        1:      __CONTROL_AGAIN_1,
+        8:      __CONTROL_AGAIN_8,
+        16:     __CONTROL_AGAIN_16,
+        120:    __CONTROL_AGAIN_120,
+    }
+    ALS_TIME_ACTUAL = {
+        2.72:   __ALS_TIME_2_72,
+        27.2:   __ALS_TIME_27_2,
+        101:    __ALS_TIME_101,
+        174:    __ALS_TIME_174,
+        696:    __ALS_TIME_696
     }
 
-    ALS_GAIN_ACTUAL = {    # Data sheet shows gain values as binary list
-        1:      1.01,      # Nominal gain 1;    actual gain 1.01
-        1.25:   1.28,      # Nominal gain 1.25; actual gain 1.28
-        1.67:   1.72,      # Nominal gain 1.67; actual gain 1.72
-        2.5:    2.60,      # Nominal gain 2.5;  actual gain 2.60
-        5:      5.21,      # Nominal gain 5;    actual gain 5.21
-        10:     10.32,     # Nominal gain 10;   actual gain 10.32
-        20:     20.00,     # Nominal gain 20;   actual gain 20
-        40:     40.00,     # Nominal gain 40;   actual gain 40
+    PROX_TIME_ACTUAL = {
+        2.72:   __PROX_TIME_2_72
     }
 
-    def __init__(self, address=0x29, debug=False):
+    def __init__(self, address=0x39, debug=False):
         # Depending on if you have an old or a new Raspberry Pi, you
         # may need to change the I2C bus.  Older Pis use SMBus 0,
         # whereas new Pis use SMBus 1.  If you see an error like:
-        # 'Error accessing 0x29: Check your I2C address '
+        # 'Error accessing 0x39: Check your I2C address '
         # change the SMBus number in the initializer below!
 
         # setup i2c bus and SFR address
@@ -120,191 +146,69 @@ class TMD2771:
         self.address = address
         self.debug = debug
 
-        # Module identification
-        self.idModel = 0x00
-        self.idModelRevMajor = 0x00
-        self.idModelRevMinor = 0x00
-        self.idModuleRevMajor = 0x00
-        self.idModuleRevMinor = 0x00
-        self.idDate = 0x00
-        self.idTime = 0x00
-
-        if self.get_register(self.__TMD2771_SYSTEM_FRESH_OUT_OF_RESET) == 1:
-            print "ToF sensor is ready."
+        # Check module identification to verify proper communication
+        self.idModel = self.get_register(self.__TMD2771_DEVICE_ID)
+        if self.idModel == (self.__ID_TMD27711 or self.__ID_TMD27713):
+            print "Prox/ALS sensor is ready. Model:", self.idModel
             self.ready = True
         else:
-            print "ToF sensor reset failure."
+            print "Prox/ALS sensor error."
             self.ready = False
 
-        # Required by datasheet
-        # http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
-        self.set_register(0x0207, 0x01)
-        self.set_register(0x0208, 0x01)
-        self.set_register(0x0096, 0x00)
-        self.set_register(0x0097, 0xfd)
-        self.set_register(0x00e3, 0x00)
-        self.set_register(0x00e4, 0x04)
-        self.set_register(0x00e5, 0x02)
-        self.set_register(0x00e6, 0x01)
-        self.set_register(0x00e7, 0x03)
-        self.set_register(0x00f5, 0x02)
-        self.set_register(0x00d9, 0x05)
-        self.set_register(0x00db, 0xce)
-        self.set_register(0x00dc, 0x03)
-        self.set_register(0x00dd, 0xf8)
-        self.set_register(0x009f, 0x00)
-        self.set_register(0x00a3, 0x3c)
-        self.set_register(0x00b7, 0x00)
-        self.set_register(0x00bb, 0x3c)
-        self.set_register(0x00b2, 0x09)
-        self.set_register(0x00ca, 0x09)
-        self.set_register(0x0198, 0x01)
-        self.set_register(0x01b0, 0x17)
-        self.set_register(0x01ad, 0x00)
-        self.set_register(0x00ff, 0x05)
-        self.set_register(0x0100, 0x05)
-        self.set_register(0x0199, 0x05)
-        self.set_register(0x01a6, 0x1b)
-        self.set_register(0x01ac, 0x3e)
-        self.set_register(0x01a7, 0x1f)
-        self.set_register(0x0030, 0x00)
-        if self.debug:
-            print"Register settings:"
-            print"0x0207 - %x" % self.get_register(0x0207)
-            print"0x0208 - %x" % self.get_register(0x0208)
-            print"0x0096 - %x" % self.get_register(0x0096)
-            print"0x0097 - %x" % self.get_register(0x0097)
-            print"0x00e3 - %x" % self.get_register(0x00e3)
-            print"0x00e4 - %x" % self.get_register(0x00e4)
-            print"0x00e5 - %x" % self.get_register(0x00e5)
-            print"0x00e6 - %x" % self.get_register(0x00e6)
-            print"0x00e7 - %x" % self.get_register(0x00e7)
-            print"0x00f5 - %x" % self.get_register(0x00f5)
-            print"0x00d9 - %x" % self.get_register(0x00d9)
-            print"0x00db - %x" % self.get_register(0x00db)
-            print"0x00dc - %x" % self.get_register(0x00dc)
-            print"0x00dd - %x" % self.get_register(0x00dd)
-            print"0x009f - %x" % self.get_register(0x009f)
-            print"0x00a3 - %x" % self.get_register(0x00a3)
-            print"0x00b7 - %x" % self.get_register(0x00b7)
-            print"0x00bb - %x" % self.get_register(0x00bb)
-            print"0x00b2 - %x" % self.get_register(0x00b2)
-            print"0x00ca - %x" % self.get_register(0x00ca)
-            print"0x0198 - %x" % self.get_register(0x0198)
-            print"0x01b0 - %x" % self.get_register(0x01b0)
-            print"0x01ad - %x" % self.get_register(0x01ad)
-            print"0x00ff - %x" % self.get_register(0x00ff)
-            print"0x0100 - %x" % self.get_register(0x0100)
-            print"0x0199 - %x" % self.get_register(0x0199)
-            print"0x01a6 - %x" % self.get_register(0x01a6)
-            print"0x01ac - %x" % self.get_register(0x01ac)
-            print"0x01a7 - %x" % self.get_register(0x01a7)
-            print"0x0030 - %x" % self.get_register(0x0030)
+    def enable(self):
+        # Recommended settings from application note
+        # http://ams.com/eng/content/view/download/145120
 
-    def default_settings(self):
-        # Recommended settings from datasheet
-        # http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
-        # Set GPIO1 high when sample complete
-        self.set_register(self.__TMD2771_SYSTEM_MODE_GPIO1, 0x10)
-        # Set Avg sample period
-        self.set_register(self.__TMD2771_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30)
-        # Set the ALS gain
-        self.set_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN, 0x46)
-        # Set auto calibration period (Max = 255)/(OFF = 0)
-        self.set_register(self.__TMD2771_SYSRANGE_VHV_REPEAT_RATE, 0xFF)
-        # Set ALS integration time to 100ms
-        self.set_register(self.__TMD2771_SYSALS_INTEGRATION_PERIOD, 0x63)
-        # perform a single temperature calibration
-        self.set_register(self.__TMD2771_SYSRANGE_VHV_RECALIBRATE, 0x01)
-
-        # Optional settings from datasheet
-        # http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
-        # Set default ranging inter-measurement period to 100ms
-        self.set_register(self.__TMD2771_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09)
-        # Set default ALS inter-measurement period to 100ms
-        self.set_register(self.__TMD2771_SYSALS_INTERMEASUREMENT_PERIOD, 0x31)
-        # Configures interrupt on 'New Sample Ready threshold event' 
-        self.set_register(self.__TMD2771_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24)
-
-        # Additional settings defaults from community
-        self.set_register(self.__TMD2771_SYSRANGE_MAX_CONVERGENCE_TIME, 0x32)
-        self.set_register(
-            self.__TMD2771_SYSRANGE_RANGE_CHECK_ENABLES, 0x10 | 0x01)
-        self.set_register_16bit(
-            self.__TMD2771_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE, 0x7B)
-        self.set_register_16bit(self.__TMD2771_SYSALS_INTEGRATION_PERIOD, 0x64)
-        self.set_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN, 0x40)
-        self.set_register(self.__TMD2771_FIRMWARE_RESULT_SCALER, 0x01)
+        # ALS integration time = 100 ms
+        self.set_register(self.__TMD2771_ALS_TIME, self.__ALS_TIME_101)
+        # Proximity integration time = 2.72 ms
+        self.set_register(self.__TMD2771_PROX_TIME, self.__PROX_TIME_2_72)
+        # Proximity pulses = 4
+        self.set_register(self.__TMD2771_PROX_PULSE_COUNT, 0x04)
+        # Control register: LED drive = 100 mA, prox. diode = CH1, ALS Gain = 1x
+        self.set_register(self.__TMD2771_CONTROL_REGISTER,
+                          (self.__CONTROL_PDRIVE_100 |
+                           self.__CONTROL_PDIODE_CH1 |
+                           self.__CONTROL_AGAIN_1)
+                          )
+        # Enable register: Enable prox and ALS interrupts, wait, prox and ALS, power on
+        self.set_register(self.__TMD2771_ENABLE,
+                          (self.__ENABLE_PIEN |
+                           self.__ENABLE_AIEN |
+                           self.__ENABLE_WEN |
+                           self.__ENABLE_PEN |
+                           self.__ENABLE_AEN |
+                           self.__ENABLE_PON)
+                          )
 
         if self.debug:
             print "Default settings:"
-            print "SYSTEM_MODE_GPIO1 - %x" % \
-                  self.get_register(self.__TMD2771_SYSTEM_MODE_GPIO1)
-            print "READOUT_AVERAGING_SAMPLE_PERIOD - %x" % \
-                  self.get_register(
-                      self.__TMD2771_READOUT_AVERAGING_SAMPLE_PERIOD)
-            print "SYSALS_ANALOGUE_GAIN - %x" % \
-                  self.get_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN)
-            print "SYSRANGE_VHV_REPEAT_RATE - %x" % \
-                  self.get_register(self.__TMD2771_SYSRANGE_VHV_REPEAT_RATE)
-            print "SYSALS_INTEGRATION_PERIOD - %x" % \
-                  self.get_register(self.__TMD2771_SYSALS_INTEGRATION_PERIOD)
-            print "SYSRANGE_VHV_RECALIBRATE - %x" % \
-                  self.get_register(self.__TMD2771_SYSRANGE_VHV_RECALIBRATE)
-            print "SYSRANGE_INTERMEASUREMENT_PERIOD - %x" % \
-                  self.get_register(
-                      self.__TMD2771_SYSRANGE_INTERMEASUREMENT_PERIOD)
-            print "SYSALS_INTERMEASUREMENT_PERIOD - %x" % \
-                  self.get_register(
-                      self.__TMD2771_SYSALS_INTERMEASUREMENT_PERIOD)
-            print "SYSTEM_INTERRUPT_CONFIG_GPIO - %x" % \
-                  self.get_register(
-                      self.__TMD2771_SYSTEM_INTERRUPT_CONFIG_GPIO)
-            print "SYSRANGE_MAX_CONVERGENCE_TIME - %x" % \
-                  self.get_register(
-                      self.__TMD2771_SYSRANGE_MAX_CONVERGENCE_TIME)
-            print "SYSRANGE_RANGE_CHECK_ENABLES - %x" % \
-                  self.get_register(self.__TMD2771_SYSRANGE_RANGE_CHECK_ENABLES)
-            print "SYSRANGE_EARLY_CONVERGENCE_ESTIMATE - %x" % \
-                  self.get_register_16bit(
-                      self.__TMD2771_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE)
-            print "SYSALS_INTEGRATION_PERIOD - %x" % \
-                  self.get_register_16bit(
-                      self.__TMD2771_SYSALS_INTEGRATION_PERIOD)
-            print "SYSALS_ANALOGUE_GAIN - %x" % \
-                  self.get_register(self.__TMD2771_SYSALS_ANALOGUE_GAIN)
-            print "FIRMWARE_RESULT_SCALER - %x" % \
-                  self.get_register(self.__TMD2771_FIRMWARE_RESULT_SCALER)
-
-    def get_identification(self):
-
-        self.idModel = self.get_register(
-            self.__TMD2771_IDENTIFICATION_MODEL_ID)
-        self.idModelRevMajor = self.get_register(
-            self.__TMD2771_IDENTIFICATION_MODEL_REV_MAJOR)
-        self.idModelRevMinor = self.get_register(
-            self.__TMD2771_IDENTIFICATION_MODEL_REV_MINOR)
-        self.idModuleRevMajor = self.get_register(
-            self.__TMD2771_IDENTIFICATION_MODULE_REV_MAJOR)
-        self.idModuleRevMinor = self.get_register(
-            self.__TMD2771_IDENTIFICATION_MODULE_REV_MINOR)
-
-        self.idDate = self.get_register_16bit(
-            self.__TMD2771_IDENTIFICATION_DATE)
-        self.idTime = self.get_register_16bit(
-            self.__TMD2771_IDENTIFICATION_TIME)
-
-    def change_address(self, old_address, new_address):
-        # NOTICE:  IT APPEARS THAT CHANGING THE ADDRESS IS NOT STORED IN NON-
-        # VOLATILE MEMORY POWER CYCLING THE DEVICE REVERTS ADDRESS BACK TO 0X29
-
-        if old_address == new_address:
-            return old_address
-        if new_address > 127:
-            return old_address
-
-        self.set_register(self.__TMD2771_I2C_SLAVE_DEVICE_ADDRESS, new_address)
-        return self.get_register(self.__TMD2771_I2C_SLAVE_DEVICE_ADDRESS)
+            print "ALS integration time - %x" % \
+                  self.get_register(self.__TMD2771_ALS_TIME)
+            print "Proximity integration time - %x" % \
+                  self.get_register(self.__TMD2771_PROX_TIME)
+            print "Proximity pulse count - %x" % \
+                  self.get_register(self.__TMD2771_PROX_PULSE_COUNT)
+            control_register = self.get_register(self.__TMD2771_CONTROL_REGISTER)
+            print "LED drive strength - %x" % \
+                  ((control_register | 0xC0) >> 6)
+            print "Proximity diode channel(s) - %x" % \
+                  ((control_register | 0x30) >> 4)
+            print "ALS gain - %x" % \
+                  (control_register | 0x03)
+            enable_register = self.get_register(self.__TMD2771_ENABLE)
+            print "Prox. interrupt enable - %x" % \
+                  ((enable_register | 0x20) >> 5)
+            print "ALS interrupt enable - %x" % \
+                  ((enable_register | 0x10) >> 4)
+            print "Wait enable - %x" % \
+                  ((enable_register | 0x08) >> 3)
+            print "Prox. sensor enable - %x" % \
+                  ((enable_register | 0x04) >> 2)
+            print "ALS sensor enable - %x" % \
+                  ((enable_register | 0x02) >> 1)
+            print "Power on - %x" % \
+                  (enable_register | 0x01)
 
     def get_distance(self):
         # Start Single shot mode
@@ -360,19 +264,20 @@ class TMD2771:
         return als_calculated
 
     def get_register(self, register_address):
-        a1 = (register_address >> 8) & 0xFF
-        a0 = register_address & 0xFF
-        self.i2c.write_i2c_block_data(self.address, a1, [a0])
+        self.i2c.write_i2c_block_data(self.address, register_address)
         data = self.i2c.read_byte(self.address)
         return data
 
     def get_register_16bit(self, register_address):
-        a1 = (register_address >> 8) & 0xFF
-        a0 = register_address & 0xFF
-        self.i2c.write_i2c_block_data(self.address, a1, [a0])
-        data0 = self.i2c.read_byte(self.address)
-        data1 = self.i2c.read_byte(self.address)
-        return (data0 << 8) | (data1 & 0xFF)
+        # Reads an unsigned 16-bit value from the I2C device
+        try:
+            result = self.bus.read_word_data(self.address, register_address)
+            if self.debug:
+                print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % \
+                      (self.address, result & 0xFFFF, register_address)
+            return result
+        except IOError, err:
+            return self.errMsg()
 
     def set_register(self, register_address, data):
         a1 = (register_address >> 8) & 0xFF
