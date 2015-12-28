@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-""" ST VL6180X ToF range finder program
- - power explorer board with 3.3 V
- - explorer board includes pull-ups on i2c """
+""" TAOS TMD2771 ALS/prox sensor test program
+"""
 
 import sys
 from TMD2771 import TMD2771
 from time import sleep
-import RPi.GPIO as GPIO  # Import GPIO functions
+from gpiozero import LED
 
 """-- Setup --"""
 debug = False
@@ -15,34 +14,27 @@ if len(sys.argv) > 1:
     if sys.argv[1] == "debug":  # sys.argv[0] is the filename
         debug = True
 
-# setup ToF ranging/ALS sensor
-tof_address = 0x29
-tof_sensor = TMD2771(address=tof_address, debug=debug)
-tof_sensor.get_identification()
-if tof_sensor.idModel != 0xB4:
-    print"Not a valid sensor id: %X" % tof_sensor.idModel
-else:
-    print"Sensor model: %X" % tof_sensor.idModel
-    print"Sensor model rev.: %d.%d" % \
-         (tof_sensor.idModelRevMajor, tof_sensor.idModelRevMinor)
-    print"Sensor module rev.: %d.%d" % \
-         (tof_sensor.idModuleRevMajor, tof_sensor.idModuleRevMinor)
-    print"Sensor date/time: %X/%X" % (tof_sensor.idDate, tof_sensor.idTime)
-tof_sensor.default_settings()
+# setup ALS/prox sensor
+sensor_address = 0x39
+sensor = TMD2771()
+sensor.debug = True
+sensor.start()
 
 # Set output pin numbers for LEDS
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)  # Use GPIO numbering scheme (not pin numbers)
-LED = [17, 27]          # List of GPIOs to use for LED output
-for i in range(len(LED)):
-    GPIO.setup(LED[i], GPIO.OUT)  # Set all as output
-    print("GPIO_%d is output" % LED[i])
-    GPIO.output(LED[i], 0)  # Turn all LEDs off
+LED1 = LED(17)
+LED1.off()
+LED2 = LED(27)
+LED2.on()
 
 sleep(1)
 
+sensor.get_distance()
+sensor.get_ambient_light()
+sensor.debug = False
+
 """-- MAIN LOOP --"""
 while True:
-    print "Measured distance is : %d mm" % tof_sensor.get_distance()
-    print "Measured light level is : %d lux" % tof_sensor.get_ambient_light(20)
+    print "Distance is: %d; Light is: %d lux" % (sensor.get_distance(), sensor.get_ambient_light())
+    LED1.toggle()
+    LED2.toggle()
     sleep(1)

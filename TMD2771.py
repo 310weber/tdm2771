@@ -236,14 +236,17 @@ class TMD2771:
             print "ALS Ch0 data - %x; Ch1 data - %x" % (ch0_data, ch1_data)
 
         als_gain_actual = self.ALS_GAIN_ACTUAL.get(
-                self.get_register(self.__TMD2771_CONTROL_REGISTER) | 0x03)
+                self.get_register(self.__TMD2771_CONTROL_REGISTER) & 0x03)
         als_time_actual = self.ALS_TIME_ACTUAL.get(
                 self.get_register(self.__TMD2771_ALS_TIME))
-        if self.debug:
-            print "ALS gain - ",als_gain_actual, "; ALS Time - ", als_time_actual
+        if als_gain_actual is None:
+            als_gain_actual = 1
+        if als_time_actual is None:
+            als_time_actual = 2.72
 
-        als_gain_actual = 1
-        als_time_actual = 2.72
+        if self.debug:
+            print "ALS gain - %d; ALS time - %d" % (als_gain_actual, als_time_actual)
+
         scaling_factor = 1.0  # 1.0 for open air (other factors for under glass)
 
         counts_per_lux = (als_time_actual * als_gain_actual) / \
