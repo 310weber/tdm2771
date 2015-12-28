@@ -36,11 +36,11 @@ sensor.debug = False
 while True:
     distance = 0
     light = 0
-    iterations = 50
+    iterations = 100
     for i in range(iterations):
         distance += sensor.get_distance()
         light += sensor.get_ambient_light()
-        sleep(0.1)
+        sleep(0.01)
     distance /= iterations
     light /= iterations
 

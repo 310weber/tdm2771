@@ -221,7 +221,7 @@ class TMD2771:
     def get_distance(self):
         prox_data = self.get_register_16bit(self.__TMD2771_PROX_DATA_LOW_BYTE)
         # Reverse bytes because low byte is read first
-        prox_data = ((prox_data << 8) & 0xFF00) | (prox_data >> 8)
+#        prox_data = ((prox_data << 8) & 0xFF00) | (prox_data >> 8)
         if self.debug:
             print "Proximity data - %d" % prox_data
         return prox_data
@@ -230,8 +230,8 @@ class TMD2771:
         ch0_data = self.get_register_16bit(self.__TMD2771_ALS_CH0_DATA_LOW_BYTE)
         ch1_data = self.get_register_16bit(self.__TMD2771_ALS_CH1_DATA_LOW_BYTE)
         # Reverse bytes because low byte is read first
-        ch0_data = ((ch0_data << 8) & 0xFF00) | (ch0_data >> 8)
-        ch1_data = ((ch1_data << 8) & 0xFF00) | (ch1_data >> 8)
+#        ch0_data = ((ch0_data << 8) & 0xFF00) | (ch0_data >> 8)
+#        ch1_data = ((ch1_data << 8) & 0xFF00) | (ch1_data >> 8)
         if self.debug:
             print "ALS Ch0 data - %x; Ch1 data - %x" % (ch0_data, ch1_data)
 
