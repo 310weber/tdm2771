@@ -36,7 +36,7 @@ sensor.debug = False
 while True:
     distance = 0
     light = 0
-    iterations = 100
+    iterations = 5
     for i in range(iterations):
         distance += sensor.get_distance()
         light += sensor.get_ambient_light()
@@ -44,7 +44,7 @@ while True:
     distance /= iterations
     light /= iterations
 
-    print "Distance is: %d; Light is: %d lux" % (distance, light)
+    print "Distance is: %4d; Light is: %4d lux" % (distance, light)
 
     LED1.toggle()
     LED2.toggle()

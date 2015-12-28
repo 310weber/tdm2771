@@ -227,11 +227,10 @@ class TMD2771:
         return prox_data
 
     def get_ambient_light(self):
+        # Data is read with low byte first but i2c read puts them in right order
         ch0_data = self.get_register_16bit(self.__TMD2771_ALS_CH0_DATA_LOW_BYTE)
         ch1_data = self.get_register_16bit(self.__TMD2771_ALS_CH1_DATA_LOW_BYTE)
-        # Reverse bytes because low byte is read first
-#        ch0_data = ((ch0_data << 8) & 0xFF00) | (ch0_data >> 8)
-#        ch1_data = ((ch1_data << 8) & 0xFF00) | (ch1_data >> 8)
+
         if self.debug:
             print "ALS Ch0 data - %x; Ch1 data - %x" % (ch0_data, ch1_data)
 
@@ -245,7 +244,8 @@ class TMD2771:
             als_time_actual = 2.72
 
         if self.debug:
-            print "ALS gain - %d; ALS time - %d" % (als_gain_actual, als_time_actual)
+            print "ALS gain - %d; ALS time - %d" \
+                  % (als_gain_actual, als_time_actual)
 
         scaling_factor = 1.0  # 1.0 for open air (other factors for under glass)
 
