@@ -1,10 +1,12 @@
 #!/usr/bin/python
 
-import time
+from time import sleep
 import smbus
 
 # ===========================================================================
-# TAOS TMD2771 proximity/ALS Class
+# TAOS/AMS TMD2771 proximity/ALS Class
+#
+# Tested on CJMCU-88 eval board
 #
 # Written by A. Weber
 # https://bitbucket.org/310weber/tmd2771
@@ -218,18 +220,28 @@ class TMD2771:
                 print "Sensor failed ot stop. Enable register - %x" % \
                       enable_register
 
-    def get_distance(self):
-        prox_data = self.get_register_16bit(self.__TMD2771_PROX_DATA_LOW_BYTE)
-        # Reverse bytes because low byte is read first
-#        prox_data = ((prox_data << 8) & 0xFF00) | (prox_data >> 8)
+    def distance(self, samples=50):
+        prox_data = 0
+        # Data is read with low byte first but i2c read puts them in right order
+        for i in range(samples):
+            prox_data += self.get_register_16bit(self.__TMD2771_PROX_DATA_LOW_BYTE)
+            sleep(0.01)
+        prox_data /= samples
+
         if self.debug:
             print "Proximity data - %d" % prox_data
         return prox_data
 
-    def get_ambient_light(self):
+    def light(self, samples=5):
+        ch0_data = 0
+        ch1_data = 0
         # Data is read with low byte first but i2c read puts them in right order
-        ch0_data = self.get_register_16bit(self.__TMD2771_ALS_CH0_DATA_LOW_BYTE)
-        ch1_data = self.get_register_16bit(self.__TMD2771_ALS_CH1_DATA_LOW_BYTE)
+        for i in range(samples):
+            ch0_data += self.get_register_16bit(self.__TMD2771_ALS_CH0_DATA_LOW_BYTE)
+            ch1_data += self.get_register_16bit(self.__TMD2771_ALS_CH1_DATA_LOW_BYTE)
+            sleep(0.05)
+        ch0_data /= samples
+        ch1_data /= samples
 
         if self.debug:
             print "ALS Ch0 data - %x; Ch1 data - %x" % (ch0_data, ch1_data)

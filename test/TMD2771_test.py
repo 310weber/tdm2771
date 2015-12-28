@@ -28,21 +28,14 @@ LED2.on()
 
 sleep(1)
 
-sensor.get_distance()
-sensor.get_ambient_light()
+sensor.distance()
+sensor.light()
 sensor.debug = False
 
 """-- MAIN LOOP --"""
 while True:
-    distance = 0
-    light = 0
-    iterations = 5
-    for i in range(iterations):
-        distance += sensor.get_distance()
-        light += sensor.get_ambient_light()
-        sleep(0.01)
-    distance /= iterations
-    light /= iterations
+    distance = sensor.distance(50)
+    light = sensor.light(10)
 
     print "Distance is: %4d; Light is: %4d lux" % (distance, light)
 
