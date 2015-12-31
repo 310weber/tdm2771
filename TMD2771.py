@@ -4,7 +4,7 @@ from time import sleep
 import smbus
 
 # ===========================================================================
-# TAOS/AMS TMD2771 proximity/ALS Class
+# TAOS/AMS TMD2771 proximity/ALS Class v1.0
 #
 # Tested on CJMCU-88 eval board
 #
