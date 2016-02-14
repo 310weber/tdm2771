@@ -230,7 +230,7 @@ class TMD2771:
 
         if self.debug:
             print "Proximity data - %d" % prox_data
-        return prox_data
+        return 1024 - prox_data
 
     def light(self, samples=5):
         ch0_data = 0
